@@ -2,8 +2,7 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const url = require('url');
-const Store = require('electron-store');
+const Store = require('./electron-store');
 const store = new Store();
 const directoryPath = store.get('path');
 
@@ -11,14 +10,12 @@ ipcMain.handle('getImage', async (event, someArgument) => {
   try {
     let buffer: Buffer;
     if (fs.existsSync(`${directoryPath}/${someArgument}/thumbnail.png`)) {
-      console.warn(someArgument, 'thumbnail.png');
       return fs
         .readFileSync(`${directoryPath}/${someArgument}/thumbnail.png`)
         .toString('base64');
     } else if (
       fs.existsSync(`${directoryPath}/${someArgument}/thumbnail.jpg`)
     ) {
-      console.warn(someArgument, 'thumbnail.jpg');
       return fs
         .readFileSync(`${directoryPath}/${someArgument}/thumbnail.jpg`)
         .toString('base64');
@@ -66,6 +63,8 @@ function createWindow(): BrowserWindow {
     y: 0,
     width: size.width,
     height: size.height,
+    alwaysOnTop: true,
+    kiosk: false,
     webPreferences: {
       nodeIntegration: true,
       allowRunningInsecureContent: serve,
