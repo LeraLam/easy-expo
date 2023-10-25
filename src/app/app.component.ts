@@ -6,21 +6,24 @@ import { APP_CONFIG } from '../environments/environment';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
+  path?: string;
+
   constructor(
     private electronService: ElectronService,
     private translate: TranslateService
   ) {
     this.translate.setDefaultLang('en');
-    console.log('APP_CONFIG', APP_CONFIG);
+    console.log('APP_CONFIG', APP_CONFIG, this.electronService.isElectron);
 
     if (electronService.isElectron) {
       console.log(process.env);
       console.log('Run in electron');
       console.log('Electron ipcRenderer', this.electronService.ipcRenderer);
       console.log('NodeJS childProcess', this.electronService.childProcess);
+      console.log('path', this.electronService);
     } else {
       console.log('Run in browser');
     }

@@ -1,9 +1,9 @@
 {
-  "name": "angular-electron",
-  "description": "Angular Electron sample",
+  "name": "easy-expo",
+  "description": "Easy expo",
   "author": {
-    "name": "Maxime GRIS",
-    "email": "maxime.gris@gmail.com"
+    "name": "Paul Lerat-Lambert",
+    "email": "paul.l.l@hotmail.fr"
   },
   "version": "13.0.0",
   "main": "main.js",
