@@ -1,0 +1,11 @@
+<div
+  class="tw-shrink-0 tw-px-4 tw-py-2 tw-rounded-full tw-items-center tw-flex tw-gap-2"
+  [ngClass]="
+    selected
+      ? 'tw-bg-selectedBlue'
+      : 'tw-border tw-border-solid tw-border-gray-600'
+  "
+>
+  <span *ngIf="selected" class="pi pi-check tw-text-lightBlue"> </span>
+  <span> {{ label }} </span>
+</div>

@@ -1,54 +1,110 @@
 import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
+import { ItemData } from '../src/app/shared/models/item-data';
 
 const Store = require('./electron-store');
 const store = new Store();
 const directoryPath = store.get('path');
 
-ipcMain.handle('getImage', async (event, someArgument) => {
-  try {
-    let buffer: Buffer;
-    if (fs.existsSync(`${directoryPath}/${someArgument}/thumbnail.png`)) {
-      return fs
-        .readFileSync(`${directoryPath}/${someArgument}/thumbnail.png`)
-        .toString('base64');
-    } else if (
-      fs.existsSync(`${directoryPath}/${someArgument}/thumbnail.jpg`)
-    ) {
-      return fs
-        .readFileSync(`${directoryPath}/${someArgument}/thumbnail.jpg`)
-        .toString('base64');
-    }
-  } catch (err) {
-    console.error(err);
-  }
+ipcMain.handle('readUTFFile', async (event, path) => {
+  return getFileContent(path, 'utf8');
 });
 
-ipcMain.handle('getDescription', async (event, someArgument) => {
-  const buffer = fs.readFileSync(
-    `${directoryPath}/${someArgument}/description.txt`
-  );
-  const content = buffer.toString('utf8');
-  return content;
+ipcMain.handle('readBase64File', async (event, path) => {
+  return getFileContent(path, 'base64');
 });
 
-ipcMain.handle('getShortDescription', async (event, someArgument) => {
-  const buffer = fs.readFileSync(
-    `${directoryPath}/${someArgument}/shortDescription.txt`
-  );
-  const content = buffer.toString('utf8');
-  return content;
+ipcMain.handle('initExpoData', async (event, dir) => {
+  return getExpoData();
 });
 
-ipcMain.handle('readdir', async (event, someArgument) => {
-  const buffer = fs.readdirSync(directoryPath);
-  const toReturn: string[] = [];
-  buffer.forEach((file) => {
-    toReturn.push(file);
+const getDirItems = (dir?: string): ItemData[] => {
+  const items: ItemData[] = [];
+  const itemsName: string[] = readDir(dir);
+  const title = dir?.split('/').slice(-1).pop() ?? 'all';
+  itemsName.forEach((name) => {
+    const item = { ...getItem(`${dir}/${name}`), tag: title };
+    items.push(item);
   });
-  return toReturn;
-});
+  return items;
+};
+
+const getExpoData = (): ItemData[] => {
+  if (store.get('menu') === 'yes') {
+    const items: ItemData[] = [];
+    const menuItems: string[] = readDir('menu');
+    menuItems.forEach((menuItem) => {
+      const menuItems = getDirItems(`menu/${menuItem}`);
+      items.push(...menuItems);
+    });
+    return items;
+  } else {
+    return getDirItems();
+  }
+};
+
+const getItem = (itemName: string): ItemData => {
+  const item: ItemData = {
+    title: itemName.split('/').slice(-1).pop() ?? 'error',
+    thumbnailSrc: getThumbnailSrc(itemName) ?? '',
+    shortDescription:
+      getFileContent(`${itemName}/shortDescription.txt`, 'utf8') ?? '',
+    description: getFileContent(`${itemName}/description.txt`, 'utf8') ?? '',
+    audio: existFile(`${itemName}/audioSrc.mp3`)
+      ? {
+          src: getFileContent(`${itemName}/audioSrc.mp3`, 'base64'),
+          title: getFileContent(`${itemName}/audioTitle.txt`, 'utf8'),
+          description: getFileContent(
+            `${itemName}/audioDescription.txt`,
+            'utf8'
+          ),
+        }
+      : undefined,
+    video: existFile(`${itemName}/videoSrc.mp4`)
+      ? {
+          src: getFileContent(`${itemName}/videoSrc.mp4`, 'base64'),
+          title: getFileContent(`${itemName}/videoTitle.txt`, 'utf8'),
+          description: getFileContent(
+            `${itemName}/videoDescription.txt`,
+            'utf8'
+          ),
+        }
+      : undefined,
+  };
+
+  return item;
+};
+
+const getThumbnailSrc = (itemName: string): string | undefined => {
+  if (existFile(`${itemName}/thumbnail.png`)) {
+    return getFileContent(`${itemName}/thumbnail.png`, 'base64');
+  } else if (existFile(`${itemName}/thumbnail.jpg`)) {
+    return getFileContent(`${itemName}/thumbnail.jpg`, 'base64');
+  }
+};
+
+const getFileContent = (
+  fileName: string,
+  type: 'base64' | 'utf8'
+): string | undefined => {
+  if (existFile(fileName)) {
+    return fs.readFileSync(`${directoryPath}/${fileName}`).toString(type);
+  }
+};
+
+const existFile = (fileName: string): boolean => {
+  return fs.existsSync(`${directoryPath}/${fileName}`);
+};
+
+const readDir = (relativePath?: string): string[] => {
+  const path = relativePath
+    ? `${directoryPath}/${relativePath}`
+    : directoryPath;
+  return fs
+    .readdirSync(path)
+    .filter((name) => fs.lstatSync(`${path}/${name}`).isDirectory());
+};
 
 let win: BrowserWindow | null = null;
 const args = process.argv.slice(1),
@@ -61,10 +117,10 @@ function createWindow(): BrowserWindow {
   win = new BrowserWindow({
     x: 0,
     y: 0,
-    width: size.width,
-    height: size.height,
+    width: !serve ? size.width : size.width / 2,
+    height: !serve ? size.height : size.height / 2,
     alwaysOnTop: true,
-    kiosk: false,
+    kiosk: true,
     webPreferences: {
       nodeIntegration: true,
       allowRunningInsecureContent: serve,
@@ -75,6 +131,7 @@ function createWindow(): BrowserWindow {
   if (serve) {
     const debug = require('electron-debug');
     debug();
+    win.kiosk = false;
 
     require('electron-reloader')(module);
     win.loadURL('http://localhost:4200');
@@ -100,14 +157,6 @@ function createWindow(): BrowserWindow {
     win = null;
   });
 
-  win.on('resize', () => {
-    // The event doesn't pass us the window size, so we call the `getBounds` method which returns an object with
-    // the height, width, and x and y coordinates.
-    let { width, height } = win!.getBounds();
-    // Now that we have them, save them using the `set` method.
-    store.set('windowBounds', { width, height });
-  });
-
   win.setMenu(null);
   return win;
 }
@@ -120,7 +169,10 @@ try {
   app.on('ready', () =>
     setTimeout(() => {
       if (!store.get('path')) {
-        store.set('path', 'C:/Users/Paull/OneDrive/Documents/easy-expo-data');
+        store.set('path', 'C:/PATH/TO/DATA');
+      }
+      if (store.get('menu') === undefined) {
+        store.set('menu', 'yes');
       }
       createWindow();
     }, 400)

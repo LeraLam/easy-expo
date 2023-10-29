@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { ElectronService } from './core/services';
 import { TranslateService } from '@ngx-translate/core';
-import { APP_CONFIG } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -16,16 +15,5 @@ export class AppComponent {
     private translate: TranslateService
   ) {
     this.translate.setDefaultLang('en');
-    console.log('APP_CONFIG', APP_CONFIG, this.electronService.isElectron);
-
-    if (electronService.isElectron) {
-      console.log(process.env);
-      console.log('Run in electron');
-      console.log('Electron ipcRenderer', this.electronService.ipcRenderer);
-      console.log('NodeJS childProcess', this.electronService.childProcess);
-      console.log('path', this.electronService);
-    } else {
-      console.log('Run in browser');
-    }
   }
 }

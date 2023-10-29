@@ -1,0 +1,21 @@
+<div class="tw-flex tw-flex-col tw-gap-2">
+  <div class="tw-flex tw-gap-2 tw-items-center">
+    <span class="tw-text-xl tw-font-medium"> {{ media.title }} </span>
+    <div class="tw-h-px tw-grow tw-bg-gray-300 tw-mr-2"></div>
+  </div>
+  <span> {{ media.description }}</span>
+  <container-element [ngSwitch]="type">
+    <div *ngSwitchCase="'video'">
+      <video class="tw-w-full" controls="nodownload" autobuffer="autobuffer">
+        <source [src]="media.src" />
+      </video>
+    </div>
+    <div *ngSwitchCase="'audio'">
+      <div class="tw-flex tw-w-full tw-justify-center">
+        <audio controls="nodownload" autobuffer="autobuffer">
+          <source [src]="media.src" />
+        </audio>
+      </div>
+    </div>
+  </container-element>
+</div>

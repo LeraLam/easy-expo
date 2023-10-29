@@ -1,0 +1,57 @@
+<div
+  class="tw-flex tw-flex-col tw-items-center tw-px-8 tw-h-full tw-justify-center tw-w-full tw-gap-4"
+>
+  <h1
+    class="tw-font-sans tw-font-bold tw-text-6xl"
+    *ngIf="$expoName | async; let expoName"
+  >
+    {{ expoName }}
+  </h1>
+  <h2
+    class="tw-font-sans tw-font-thin tw-italic tw-text-lg"
+    *ngIf="$expoDescription | async; let expoDescription"
+  >
+    {{ expoDescription }}
+  </h2>
+  <p-panel header="Filtres" [toggleable]="true" class="tw-w-full">
+    <div class="tw-m-4 tw-flex tw-flex-row tw-gap-2 tw-flex-wrap">
+      <app-filter-chip
+        [label]="'Tous'"
+        (click)="toggleFilter('tous')"
+        [selected]="selectedFilter.length === 0"
+      >
+      </app-filter-chip>
+      <app-filter-chip
+        *ngFor="let item of $filterItems | async"
+        [label]="item"
+        (click)="toggleFilter(item)"
+        [selected]="selectedFilter.includes(item)"
+      >
+      </app-filter-chip>
+    </div>
+  </p-panel>
+
+  <p-progressSpinner *ngIf="loading(); else notLoading"></p-progressSpinner>
+  <ng-template #notLoading>
+    <div *ngIf="$carouselData | async; let data" class="tw-max-w-[90%]">
+      <p-carousel
+        pAutoFocus
+        [value]="data"
+        [numVisible]="5"
+        [numScroll]="4"
+        [circular]="false"
+        [responsiveOptions]="responsiveOptions"
+        [autoplayInterval]="10000"
+      >
+        <ng-template let-card pTemplate="item">
+          <div class="tw-max-w-md">
+            <app-carousel-card pAutoFocus [itemData]="card"></app-carousel-card>
+          </div>
+        </ng-template>
+      </p-carousel>
+    </div>
+    <!-- <audio controls="nodownload" autobuffer="autobuffer">
+        <source [src]="son" />
+      </audio> -->
+  </ng-template>
+</div>

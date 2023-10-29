@@ -1,0 +1,24 @@
+<div
+  class="tw-flex tw-flex-col tw-gap-2 tw-items-center tw-px-2 tw-py-4 tw-border tw-border-gray-700 tw-border-solid tw-mx-2 tw-shadow-sm tw-shadow-slate-400 tw-rounded-md"
+>
+  <img
+    [src]="itemData.thumbnailSrc"
+    alt="Image"
+    width="250"
+    class="tw-rounded-sm tw-h-80"
+  />
+  <div class="tw-font-semibold tw-text-lg">{{ itemData.title }}</div>
+  <div class="tw-w-full flex tw-justify-start tw-p-2">
+    <p-chip *ngIf="itemData.tag" [label]="itemData.tag"></p-chip>
+  </div>
+  <div class="tw-font-light tw-text-sm tw-h-32">
+    {{ itemData.shortDescription }}
+  </div>
+  <div class="tw-flex tw-flex-row tw-w-full tw-justify-end">
+    <p-button
+      (onClick)="navigate(itemData.title)"
+      label="En savoir plus"
+      styleClass="p-button p-button-link"
+    ></p-button>
+  </div>
+</div>

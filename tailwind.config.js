@@ -9,6 +9,8 @@ module.exports = {
     extend: {
       colors: {
         flashWhite: "#F8F8F8",
+        selectedBlue: "#0b213f",
+        lightBlue: '#93C5FD'
       },
     },
   },

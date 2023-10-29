@@ -15,7 +15,7 @@
     }
   ],
   "win": {
-    "icon": "dist/assets/icons",
+    "icon": "dist/assets/icons/favicon.512x512.png",
     "target": [
       "portable"
     ]
