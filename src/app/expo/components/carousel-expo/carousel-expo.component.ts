@@ -69,6 +69,7 @@ export class CarouselExpoComponent implements OnInit {
       console.warn('carouselData', carouselData)
     );
     this.$expoName.subscribe((expoName) => console.warn('expoName', expoName));
+
     this.$filterItems.subscribe((items) => console.warn('items', items));
   }
 

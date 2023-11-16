@@ -11,5 +11,6 @@ export interface ItemData {
   description?: string;
   audio?: ItemMedia;
   video?: ItemMedia;
+  image?: ItemMedia;
   tag?: string;
 }

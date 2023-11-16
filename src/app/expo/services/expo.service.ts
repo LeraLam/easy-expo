@@ -17,7 +17,6 @@ export class ExpoService {
 
   initExpo(): void {
     if (!this.isExpoInitilized()) {
-      console.warn('initExpo');
       this.$items = from(this.ElectronService.initExpoData()).pipe(
         map((items) =>
           items.map((item) => {
@@ -25,10 +24,16 @@ export class ExpoService {
               ...item,
               thumbnailSrc: `data:image/jpeg;base64,${item.thumbnailSrc}`,
             };
-            if (prefixedItem.audio?.src) {
+            if (
+              prefixedItem.audio?.src &&
+              !prefixedItem.audio.src.startsWith('data:')
+            ) {
               prefixedItem.audio.src = `data:audio/mp3;base64,${prefixedItem.audio.src}`;
             }
-            if (prefixedItem.video?.src) {
+            if (
+              prefixedItem.video?.src &&
+              !prefixedItem.video.src.startsWith('data:')
+            ) {
               prefixedItem.video.src = `data:video/mp4;base64,${prefixedItem.video.src}`;
             }
             return prefixedItem;

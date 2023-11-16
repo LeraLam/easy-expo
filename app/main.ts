@@ -47,7 +47,10 @@ const getExpoData = (): ItemData[] => {
 const getItem = (itemName: string): ItemData => {
   const item: ItemData = {
     title: itemName.split('/').slice(-1).pop() ?? 'error',
-    thumbnailSrc: getThumbnailSrc(itemName) ?? '',
+    thumbnailSrc:
+      (existFile(`${itemName}/thumbnail.png`)
+        ? getFileContent(`${itemName}/thumbnail.png`, 'base64')
+        : getFileContent(`${itemName}/thumbnail.jpg`, 'base64')) ?? '',
     shortDescription:
       getFileContent(`${itemName}/shortDescription.txt`, 'utf8') ?? '',
     description: getFileContent(`${itemName}/description.txt`, 'utf8') ?? '',
@@ -61,6 +64,20 @@ const getItem = (itemName: string): ItemData => {
           ),
         }
       : undefined,
+    image:
+      existFile(`${itemName}/imageSrc.jpg`) ||
+      existFile(`${itemName}/imageSrc.png`)
+        ? {
+            src: existFile(`${itemName}/imageSrc.jpg`)
+              ? getFileContent(`${itemName}/imageSrc.jpg`, 'base64')
+              : getFileContent(`${itemName}/imageSrc.png`, 'base64'),
+            title: getFileContent(`${itemName}/imageTitle.txt`, 'utf8'),
+            description: getFileContent(
+              `${itemName}/imageDescription.txt`,
+              'utf8'
+            ),
+          }
+        : undefined,
     video: existFile(`${itemName}/videoSrc.mp4`)
       ? {
           src: getFileContent(`${itemName}/videoSrc.mp4`, 'base64'),
@@ -74,14 +91,6 @@ const getItem = (itemName: string): ItemData => {
   };
 
   return item;
-};
-
-const getThumbnailSrc = (itemName: string): string | undefined => {
-  if (existFile(`${itemName}/thumbnail.png`)) {
-    return getFileContent(`${itemName}/thumbnail.png`, 'base64');
-  } else if (existFile(`${itemName}/thumbnail.jpg`)) {
-    return getFileContent(`${itemName}/thumbnail.jpg`, 'base64');
-  }
 };
 
 const getFileContent = (

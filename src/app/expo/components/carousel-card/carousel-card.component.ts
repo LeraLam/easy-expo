@@ -7,13 +7,10 @@ import { Router } from '@angular/router';
   templateUrl: './carousel-card.component.html',
   styleUrls: ['./carousel-card.component.scss'],
 })
-export class CarouselCardComponent implements OnInit {
+export class CarouselCardComponent {
   @Input() itemData!: ItemData;
   constructor(private router: Router) {}
 
-  ngOnInit(): void {
-    console.warn('CarouselCardComponent', this.itemData);
-  }
   navigate(name: string): void {
     void this.router.navigate(['expo', name]);
   }
